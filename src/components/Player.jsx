@@ -15,6 +15,8 @@ const Player = ({ currentSong, isPlaying, setIsPlaying, onTrackSkipped }) => {
     duration: 0,
   });
 
+  const animationPercentage = (songInfo.currentTime / songInfo.duration) * 100;
+
   const handlePlaySong = (e) => {
     e.preventDefault();
     if (isPlaying) {
@@ -33,7 +35,7 @@ const Player = ({ currentSong, isPlaying, setIsPlaying, onTrackSkipped }) => {
     });
   };
   const formatTime = (time) => {
-    if (!time) return "";
+    if (!time) return "0:00";
     return (
       Math.floor(time / 60) + ":" + ("0" + Math.floor(time % 60)).slice(-2)
     );
@@ -52,20 +54,33 @@ const Player = ({ currentSong, isPlaying, setIsPlaying, onTrackSkipped }) => {
   return (
     <div className="player">
       <div className="time-control">
-        <p>{formatTime(songInfo.currentTime)}</p>
-        <input
-          min={0}
-          max={songInfo.duration ? songInfo.duration : 0}
-          value={songInfo.currentTime ?? 0}
-          onChange={handleDrag}
-          type="range"
-        />
+        <p>{formatTime(songInfo.currentTime || 0)}</p>
+        <div
+          className="track"
+          style={{
+            background: `linear-gradient(to right, ${currentSong.color[0]}, ${currentSong.color[1]})`,
+          }}
+        >
+          <input
+            min={0}
+            max={songInfo.duration || 0}
+            value={songInfo.currentTime || 0}
+            onChange={handleDrag}
+            type="range"
+          />
+          <div
+            className="animate-track"
+            style={{
+              transform: `translateX(${animationPercentage}%)`,
+            }}
+          ></div>
+        </div>
         <p>{formatTime(songInfo.duration)}</p>
       </div>
       <div className="play-control">
-        <FontAwesomeIcon 
-          className="skip-back" 
-          size="2x" 
+        <FontAwesomeIcon
+          className="skip-back"
+          size="2x"
           icon={faAngleLeft}
           onClick={() => onTrackSkipped(-1)}
         />
@@ -79,7 +94,9 @@ const Player = ({ currentSong, isPlaying, setIsPlaying, onTrackSkipped }) => {
           className="skip-forward"
           size="2x"
           icon={faAngleRight}
-          onClick={() => onTrackSkipped(1)}
+          onClick={() => {
+            onTrackSkipped(1)
+          }}
         />
       </div>
       <audio
